@@ -102,6 +102,7 @@ class TransformerDecoderBlock(layers.Layer):
 
 class Model(keras.Model):
   def __init__(self, vocab_size, captions_image=5, verbose=True):
+    print("Batch size",BATCH_SIZE)
     super().__init__()
     self.cnn_model      = self.get_cnn_model()
     self.vocab_size     = vocab_size
