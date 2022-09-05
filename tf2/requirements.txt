@@ -3,3 +3,4 @@ tensorflow
 imageio
 matplotlib
 tqdm
+dataclasses

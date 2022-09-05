@@ -27,7 +27,7 @@ import tensorflow as tf
 
 #from .statistics import TrainingStatistics
 #from .statistics import PrecisionRecallCurveCalculator
-#from .datasets import voc
+from .datasets import coco
 #from .models import faster_rcnn
 #from .models import vgg16
 #from .models import math_utils
