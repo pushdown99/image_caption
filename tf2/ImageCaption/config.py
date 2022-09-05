@@ -6,7 +6,7 @@ NUM_HEADS       = 6
 FF_DIM          = 1024
 SHUFFLE_DIM     = 512
 BATCH_SIZE      = 64
-EPOCHS          = 50
+EPOCHS          = 1
 
 REDUCE_DATASET  = False
 NUM_TRAIN_IMG   = 68363

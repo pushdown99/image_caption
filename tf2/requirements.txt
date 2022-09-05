@@ -4,3 +4,4 @@ imageio
 matplotlib
 tqdm
 dataclasses
+jax

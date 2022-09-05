@@ -19,9 +19,9 @@ class Dataset:
 
     self.dir            = dir
     self.verbose        = verbose
-    self.train_json = os.path.join(self.dir, 'annotations/coco2014.train.json')
-    self.valid_json = os.path.join(self.dir, 'annotations/coco2014.valid.json')
-    self.text_json  = os.path.join(self.dir, 'annotations/coco2014.text.json' )
+    self.train_json = os.path.join(self.dir, 'annotations/coco2017.train.json')
+    self.valid_json = os.path.join(self.dir, 'annotations/coco2017.valid.json')
+    self.text_json  = os.path.join(self.dir, 'annotations/coco2017.text.json' )
 
     if not os.path.exists(self.train_json):
       raise FileNotFoundError("Dataset directory does not exist: %s" % self.train_json)

@@ -102,10 +102,11 @@ class TransformerDecoderBlock(layers.Layer):
 
 class Model(keras.Model):
   def __init__(self, vocab_size, captions_image=5, verbose=True):
-    print("Batch size",BATCH_SIZE)
     super().__init__()
     self.cnn_model      = self.get_cnn_model()
     self.vocab_size     = vocab_size
+    self.batch_size     = BATCH_SIZE
+    self.epochs         = EPOCHS
     self.encoder        = TransformerEncoderBlock(embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=NUM_HEADS)
     self.decoder        = TransformerDecoderBlock(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS, vocab_size=self.vocab_size)
     self.loss_tracker   = keras.metrics.Mean(name="loss")
@@ -125,12 +126,12 @@ class Model(keras.Model):
     super().compile (optimizer=self.optimizer, loss=self.cross_entropy)
 
   def Fit(self):
-    self._hist = super().fit(self.train_dataset, epochs=1, validation_data=self.valid_dataset, callbacks=[self.early_stop])
+    self._hist = super().fit(self.train_dataset, epochs=self.epochs, validation_data=self.valid_dataset, callbacks=[self.early_stop])
     return self._hist
 
   def Evaluate(self):
-    self.train_metrics = super().evaluate(self.train_dataset, batch_size=BATCH_SIZE)
-    self.valid_metrics = super().evaluate(self.valid_dataset, batch_size=BATCH_SIZE)
+    self.train_metrics = super().evaluate(self.train_dataset, batch_size=self.batch_size)
+    self.valid_metrics = super().evaluate(self.valid_dataset, batch_size=self.batch_size)
     if self.verbose:
       print("Train metrics  : loss {}, accuracy {}".format(self.train_metrics[0], self.train_metrics[1])) 
       print("Valid metrics  : loss {}, accuracy {}".format(self.valid_metrics[0], self.valid_metrics[1])) 

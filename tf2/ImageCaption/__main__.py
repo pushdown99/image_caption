@@ -97,8 +97,5 @@ if __name__ == "__main__":
   model.Dataset (train_dataset, valid_dataset)
   model.Compile ()
   model.Fit ()
-
-  # Compute definitive metrics on train/valid set
-  train_metrics = model.evaluate(train_dataset, batch_size=BATCH_SIZE)
-  valid_metrics = model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
+  model.Evaluate ()
 
