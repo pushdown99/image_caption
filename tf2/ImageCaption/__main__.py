@@ -15,10 +15,20 @@
 # - 
 #
 
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+print('')
+print('________                               _______________')
+print('___  __/__________________________________  ____/__  /________      __')
+print('__  /  _  _ \_  __ \_  ___/  __ \_  ___/_  /_   __  /_  __ \_ | /| / /')
+print('_  /   /  __/  / / /(__  )/ /_/ /  /   _  __/   _  / / /_/ /_ |/ |/ /')
+print('/_/    \___//_/ /_//____/ \____//_/    /_/      /_/  \____/____/|__/')
+print('')
+
 
 import argparse
 import numpy as np
-import os
 import random
 from tqdm import tqdm
 from tensorflow.keras.optimizers import SGD
@@ -27,8 +37,8 @@ import tensorflow as tf
 
 #from .statistics import TrainingStatistics
 #from .statistics import PrecisionRecallCurveCalculator
-from .datasets import coco
-#from .models import faster_rcnn
+from .datasets  import coco2014
+from .models    import caption
 #from .models import vgg16
 #from .models import math_utils
 #from .models import anchors
@@ -73,10 +83,22 @@ if __name__ == "__main__":
 
   # Run-time environment
   cuda_available = tf.test.is_built_with_cuda()
-  gpu_available = tf.test.is_gpu_available(cuda_only = False, min_cuda_compute_capability = None)
+  #gpu_available = tf.test.is_gpu_available(cuda_only = False, min_cuda_compute_capability = None)
+  gpu_available = len(tf.config.list_physical_devices('GPU'))
+
   print("CUDA Available : %s" % ("yes" if cuda_available else "no"))
   print("GPU Available  : %s" % ("yes" if gpu_available else "no"))
   print("Eager Execution: %s" % ("yes" if tf.executing_eagerly() else "no"))
 
+  dataset = coco2014.Dataset()
+  train_dataset, valid_dataset = dataset.Load()
 
+  model = caption.Model(dataset.get_vocab_size())
+  model.Dataset (train_dataset, valid_dataset)
+  model.Compile ()
+  model.Fit ()
+
+  # Compute definitive metrics on train/valid set
+  train_metrics = model.evaluate(train_dataset, batch_size=BATCH_SIZE)
+  valid_metrics = model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
 
