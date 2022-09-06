@@ -101,12 +101,13 @@ class TransformerDecoderBlock(layers.Layer):
     return tf.tile(mask, mult)
 
 class Model(keras.Model):
-  def __init__(self, vocab_size, captions_image=5, verbose=True):
+  def __init__(self, tokennizer, vocab_size, captions_image=5, verbose=True):
     super().__init__()
     self.cnn_model      = self.get_cnn_model()
-    self.vocab_size     = vocab_size
     self.batch_size     = BATCH_SIZE
     self.epochs         = EPOCHS
+    self.tokennizer     = tokennizer
+    self.vocab_size     = vocab_size
     self.encoder        = TransformerEncoderBlock(embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=NUM_HEADS)
     self.decoder        = TransformerDecoderBlock(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS, vocab_size=self.vocab_size)
     self.loss_tracker   = keras.metrics.Mean(name="loss")
@@ -132,9 +133,47 @@ class Model(keras.Model):
   def Evaluate(self):
     self.train_metrics = super().evaluate(self.train_dataset, batch_size=self.batch_size)
     self.valid_metrics = super().evaluate(self.valid_dataset, batch_size=self.batch_size)
+    if TEST_DATASET:
+        self.test_metrics = super().evaluate(self.test_dataset, batch_size=self.batch_size)
+
     if self.verbose:
       print("Train metrics  : loss {}, accuracy {}".format(self.train_metrics[0], self.train_metrics[1])) 
       print("Valid metrics  : loss {}, accuracy {}".format(self.valid_metrics[0], self.valid_metrics[1])) 
+      if TEST_DATASET:
+        print("Test metrics   : loss {}, accuracy {}".format(self.test_metrics[0], self.test_metrics[1])) 
+
+  def Save(self):
+    if not os.path.exists(SAVE_DIR):
+      os.mkdir(SAVE_DIR)
+
+    # Save training history under the form of a json file
+    self._histdict = self._hist.history
+    json.dump(history_dict, open(os.path.join(SAVE_DIR, 'history.json'), 'w'))
+
+    # Save weights model
+    super().save_weights(os.path.join(SAVE_DIR, 'model.h5'))
+
+    # Save config model train
+    config_train = {"IMAGE_SIZE"	: IMAGE_SIZE,
+                    "MAX_VOCAB_SIZE": MAX_VOCAB_SIZE,
+                    "SEQ_LENGTH" 	: SEQ_LENGTH,
+                    "EMBED_DIM" 	: EMBED_DIM,
+                    "NUM_HEADS" 	: NUM_HEADS,
+                    "FF_DIM" 		: FF_DIM,
+                    "BATCH_SIZE" 	: self.batch_size,
+                    "EPOCHS" 		: EPOCHS,
+                    "VOCAB_SIZE" 	: self.vocab_size}
+    json.dump(config_train, open(os.path.join(SAVE_DIR, 'config.json'), 'w'))
+
+    # Save tokenizer model
+    self.save_tokenizer(self.tokenizer, SAVE_DIR)
+
+  def save_tokenizer(tokenizer, path_save):
+    input 	= tf.keras.layers.Input(shape=(1,), dtype=tf.string)
+    output 	= self.tokenizer(input)
+    model 	= tf.keras.Model(input, output)
+    #model.save(path_save + "tokenizer", save_format='tf')
+    super().save(os.path.join(SAVE_DIR, 'tokenizer'))
 
   def get_cnn_model(self):
     base_model = efficientnet.EfficientNetB0(input_shape=(*IMAGE_SIZE, 3), include_top=False, weights="imagenet",)

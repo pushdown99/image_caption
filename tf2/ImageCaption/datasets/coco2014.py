@@ -44,7 +44,8 @@ class Dataset:
       #tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal"),
       tf.keras.layers.experimental.preprocessing.RandomTranslation(height_factor=(-0.10, 0.10), width_factor=(-0.10, 0.10)),
       tf.keras.layers.experimental.preprocessing.RandomZoom(height_factor=(-0.10, 0.10), width_factor=(-0.10, 0.10)),
-      tf.keras.layers.experimental.preprocessing.RandomRotation(factor=(-0.10, 0.10))])
+      tf.keras.layers.experimental.preprocessing.RandomRotation(factor=(-0.10, 0.10))
+    ])
 
     # Load
     with open(self.train_json) as json_file:
@@ -83,8 +84,11 @@ class Dataset:
     if self.verbose:
       print('Split val/test : sample: (train {:,}, valid {:,}, test {:,}, text {:,})'.format(len(self.train_data), len(self.valid_data), len(self.test_data), len(self.text_data)))
 
-  def get_vocab_size(self):
+  def get_vocab_size (self):
     return self.vocab_size
+
+  def get_tokenizer (self):
+    return self.tokenizer
 
   def reduce_dataset_dim(self, captions_mapping_train, captions_mapping_valid):
     train_data = {}
@@ -166,8 +170,8 @@ class Dataset:
 
     return decode_image
 
-  def setting_batch_dataset (self, images, captions, toAugment):
-    read_image_xx = self.read_image (toAugment)
+  def setting_batch_dataset (self, images, captions, aug):
+    read_image_xx = self.read_image (aug)
     img_dataset   = tf.data.Dataset.from_tensor_slices(list(images))
     img_dataset   = (img_dataset.map(read_image_xx, num_parallel_calls=AUTOTUNE))
     cap_dataset   = tf.data.Dataset.from_tensor_slices(captions).map(self.tokenizer, num_parallel_calls=AUTOTUNE)
@@ -176,8 +180,10 @@ class Dataset:
     return dataset
 
   def Load(self):
-    train_dataset = self.setting_batch_dataset (list(self.train_data.keys()), list(self.train_data.values()), toAugment=TRAIN_SET_AUG)
-    valid_dataset = self.setting_batch_dataset (list(self.valid_data.keys()), list(self.valid_data.values()), toAugment=VALID_SET_AUG)
-    return train_dataset, valid_dataset
+    self.train_dataset = self.setting_batch_dataset (list(self.train_data.keys()), list(self.train_data.values()), aug=TRAIN_AUGMENT)
+    self.valid_dataset = self.setting_batch_dataset (list(self.valid_data.keys()), list(self.valid_data.values()), aug=VALID_AUGMENT)
+    if TEST_DATASET:
+        test_dataset = self.setting_batch_dataset (list(self.test_data.keys()), list(self.test_data.values()), auf=False)
+    return self.train_dataset, self.valid_dataset
 
 

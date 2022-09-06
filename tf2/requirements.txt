@@ -1,5 +1,6 @@
 numpy
 tensorflow
+silence-tensorflow
 imageio
 matplotlib
 tqdm

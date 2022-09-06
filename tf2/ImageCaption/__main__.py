@@ -16,14 +16,17 @@
 #
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 print('')
 print('________                               _______________')
 print('___  __/__________________________________  ____/__  /________      __')
 print('__  /  _  _ \_  __ \_  ___/  __ \_  ___/_  /_   __  /_  __ \_ | /| / /')
-print('_  /   /  __/  / / /(__  )/ /_/ /  /   _  __/   _  / / /_/ /_ |/ |/ /')
-print('/_/    \___//_/ /_//____/ \____//_/    /_/      /_/  \____/____/|__/')
+print('_  /   /  __/  / / /(__  )/ /_/ /  /   _  __/   _  / / /_/ /_ |/ |/ / ')
+print('/_/    \___//_/ /_//____/ \____//_/    /_/      /_/  \____/____/|__/  ')
+print('')
+print('----------------------------------------------------------------------')
 print('')
 
 
@@ -31,9 +34,16 @@ import argparse
 import numpy as np
 import random
 from tqdm import tqdm
+import tensorflow as tf
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.optimizers import Adam
-import tensorflow as tf
+from silence_tensorflow import silence_tensorflow
+
+#tf.get_logger().setLevel('WARNING')
+#silence_tensorflow()
+import logging
+logging.getLogger('tensorflow').disabled = True
+#logging.getLogger("tensorflow").setLevel(logging.WARNING)
 
 #from .statistics import TrainingStatistics
 #from .statistics import PrecisionRecallCurveCalculator
@@ -93,7 +103,7 @@ if __name__ == "__main__":
   dataset = coco2014.Dataset()
   train_dataset, valid_dataset = dataset.Load()
 
-  model = caption.Model(dataset.get_vocab_size())
+  model = caption.Model(dataset.get_tokenizer(), dataset.get_vocab_size())
   model.Dataset (train_dataset, valid_dataset)
   model.Compile ()
   model.Fit ()
